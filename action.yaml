@@ -1,0 +1,54 @@
+name: "Github Watcher Action"
+description: "Run Github Watcher"
+
+inputs:
+  version:
+    description: "Github Watcher version"
+    required: true
+    default: "0.1.3"
+  config_path:
+    description: "Path to config file"
+    required: true
+  env_variables:
+    description: "Environment variables"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Prepare env file
+      shell: bash
+      env:
+        env_variables: ${{ inputs.env_variables }}
+      run: |
+        echo "$env_variables" >> ${{ github.action_path }}/.env
+
+    - name: Cleanup env file
+      uses: gacts/run-and-post-run@v1
+      with:
+        post: |
+          rm ${{ github.action_path }}/.env
+
+    - name: Prepare state directory
+      uses: actions/cache@v4
+      with:
+        path: state
+        # cache is immutable, so we need to create a new key for each run
+        # https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
+        key: github-watcher-state-${{ github.run_id }}
+        restore-keys: |
+          github-watcher-state-
+
+    - name: Run docker container
+      shell: bash
+      env:
+        version: ${{ inputs.version }}
+      run: |
+        docker run \
+          --rm \
+          --volume ${{ github.action_path }}/settings.yaml:/settings.yaml \
+          --volume ${{ github.workspace }}/${{ inputs.config_path }}:/config.yaml \
+          --volume ${{ github.action_path }}/state:/state \
+          --env-file ${{ github.action_path }}/.env \
+          --env GITHUB_WATCHER_SETTINGS_YAML=/settings.yaml \
+          ghcr.io/ovsds/github-watcher:${{ inputs.version }}

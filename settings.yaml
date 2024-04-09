@@ -1,0 +1,10 @@
+tasks:
+  timeout: 240 # 4 minutes
+  config_backend:
+    type: yaml_file
+    path: /config.yaml
+  queue_backend:
+    type: memory
+  state_backend:
+    type: local_dir
+    path: /state
