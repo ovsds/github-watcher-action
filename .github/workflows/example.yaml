@@ -1,5 +1,8 @@
 name: Example workflow
 
+concurrency:
+  group: ${{ github.workflow }}
+
 on:
   schedule:
     - cron: "*/5 * * * *" # every 5 minutes
