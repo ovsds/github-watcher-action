@@ -32,7 +32,7 @@ runs:
     - name: Prepare state directory
       uses: actions/cache@v4
       with:
-        path: state
+        path: ${{ github.action_path }}/state
         # cache is immutable, so we need to create a new key for each run
         # https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
         key: github-watcher-state-${{ github.run_id }}
