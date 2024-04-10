@@ -11,10 +11,10 @@ tasks:
           - github-watcher-action
         subtriggers:
           - type: repository_issue_created
-            exclude_authors:
+            exclude_author:
               - ovsds
           - type: repository_pr_created
-            exclude_authors:
+            exclude_author:
               - ovsds
           - type: repository_failed_workflow_run
             exclude:
