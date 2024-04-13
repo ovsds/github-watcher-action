@@ -1,5 +1,6 @@
 tasks:
-  timeout: 240 # 4 minutes
+  scheduler:
+    timeout: 240 # 4 minutes
   config_backend:
     type: yaml_file
     path: /config.yaml
