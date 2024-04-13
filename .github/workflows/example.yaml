@@ -16,8 +16,12 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repository
+      - name: Checkout config file
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            example_config.yaml
+          sparse-checkout-cone-mode: false
 
       - name: Run
         uses: ovsds/github-watcher-action@main
