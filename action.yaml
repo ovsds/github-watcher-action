@@ -59,3 +59,7 @@ runs:
       with:
         path: ${{ github.action_path }}/state
         key: github-watcher-state-${{ github.run_id }}
+
+branding:
+  icon: "message-circle"
+  color: "blue"
