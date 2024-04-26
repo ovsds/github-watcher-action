@@ -5,7 +5,7 @@ inputs:
   version:
     description: "Github Watcher version"
     required: true
-    default: "0.3.1"
+    default: "0.5.0"
   config_path:
     description: "Path to config file"
     required: true
