@@ -1,5 +1,6 @@
 tasks:
   - id: example_task
+    type: once_per_run
     triggers:
       - id: example_trigger
         type: github
@@ -7,7 +8,7 @@ tasks:
           type: env
           key: GITHUB_TOKEN
         owner: ovsds
-        repos:
+        include_repos:
           - github-watcher-action
         subtriggers:
           - type: repository_issue_created
