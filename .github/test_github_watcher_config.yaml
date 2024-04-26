@@ -1,0 +1,24 @@
+tasks:
+  - id: example_task
+    type: once_per_run
+    triggers:
+      - id: example_trigger
+        type: github
+        token_secret:
+          type: env
+          key: GITHUB_TOKEN
+        default_timedelta_seconds: 600
+        owner: ovsds
+        include_repos:
+          - github-watcher-action
+        subtriggers:
+          - type: repository_pr_created
+    actions:
+      - id: example_action
+        type: telegram_webhook
+        chat_id_secret:
+          type: env
+          key: TELEGRAM_CHAT_ID
+        token_secret:
+          type: env
+          key: TELEGRAM_TOKEN
