@@ -32,3 +32,12 @@ jobs:
       - name: Test PR
         run: |
           task test
+
+      - name: Test Run
+        uses: ./
+        with:
+          config_path: .github/test_github_watcher_config.yaml
+          env_variables: |
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+            TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}
+            TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}

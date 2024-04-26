@@ -7,19 +7,12 @@ tasks:
         token_secret:
           type: env
           key: GITHUB_TOKEN
+        default_timedelta_seconds: 600
         owner: ovsds
         include_repos:
           - github-watcher-action
         subtriggers:
-          - type: repository_issue_created
-            exclude_author:
-              - ovsds
           - type: repository_pr_created
-            exclude_author:
-              - ovsds
-          - type: repository_failed_workflow_run
-            exclude:
-              - Check PR
     actions:
       - id: example_action
         type: telegram_webhook
