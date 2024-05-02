@@ -17,13 +17,18 @@ inputs:
     required: false
     default: "/tmp/github-watcher-action/state"
   env_path:
-    description: "Path to env file"
+    description: "Path to env file, that will be used to pass env_variables to the container"
     required: false
     default: ".env"
   state_cache_prefix:
     description: "Cache prefix for state directory"
     required: false
     default: "github-watcher-state"
+
+outputs:
+  state_cache_key:
+    description: "Cache key for state directory"
+    value: ${{ inputs.state_cache_prefix }}-${{ github.run_id }}-${{ github.run_attempt }}
 
 runs:
   using: "composite"

@@ -77,14 +77,20 @@ More information on config can be found in
 
 ## Inputs
 
-| Name                 | Description                                                                             | Default                            |
-| -------------------- | --------------------------------------------------------------------------------------- | ---------------------------------- |
-| `version`            | GitHub Watcher version to use.                                                          | `0.3.1`                            |
-| `config_path`        | Path to the config file.                                                                |                                    |
-| `env_variables`      | Environment variables to set.                                                           |                                    |
-| `state_path`         | Path to the state folder. Must be absolute and independent from the runner's workspace. | `/tmp/github-watcher-action/state` |
-| `env_path`           | Path to the temporary env file used to store env_variables during run.                  | `.env`                             |
-| `state_cache_prefix` | Prefix for the state cache key.                                                         | `github-watcher-state`             |
+| Name                 | Description                                                                                                                      | Default                            |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `version`            | Github Watcher version                                                                                                           | `0.3.1`                            |
+| `config_path`        | Path to the config file                                                                                                          |                                    |
+| `env_variables`      | Environment variables                                                                                                            |                                    |
+| `state_path`         | Path to state directory, should be absolute and independent from the runner's workspace, otherwise cache will not work correctly | `/tmp/github-watcher-action/state` |
+| `env_path`           | Path to env file, that will be used to pass env_variables to the container                                                       | `.env`                             |
+| `state_cache_prefix` | Cache prefix for state directory                                                                                                 | `github-watcher-state`             |
+
+## Outputs
+
+| Name              | Description                   |
+| ----------------- | ----------------------------- |
+| `state_cache_key` | Cache key for state directory |
 
 ## GitHub Watcher Settings
 
