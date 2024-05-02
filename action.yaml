@@ -70,6 +70,7 @@ runs:
           --volume ${{ inputs.state_path }}:/state \
           --env-file ${{ inputs.env_path }} \
           --env GITHUB_WATCHER_SETTINGS_YAML=/settings.yaml \
+          --user $UID:$GID \
           ghcr.io/ovsds/github-watcher:${{ inputs.version }}
 
     - name: Print state directory
@@ -88,13 +89,13 @@ runs:
       if: success() || failure()
       shell: bash
       run: |
-        sudo rm -rf ${{ inputs.state_path }}
+        rm -rf ${{ inputs.state_path }}
 
     - name: Cleanup env file
       if: success() || failure()
       shell: bash
       run: |
-        sudo rm ${{ inputs.env_path }}
+        rm ${{ inputs.env_path }}
 
 branding:
   icon: "message-circle"

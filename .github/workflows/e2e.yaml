@@ -16,6 +16,7 @@ env:
     GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
     TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}
     TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_TEST_CHAT_ID }}
+    GITHUB_WATCHER_LOGS__LEVEL=DEBUG
 
 jobs:
   e2e-default:
@@ -62,15 +63,14 @@ jobs:
         uses: ./
         with:
           state_path: ${{ env.state_path }}
-          state_cache_prefix: ${{ env.state_cache_prefix }}
+          state_cache_prefix: ${{ env.state_cache_prefix }}-no-cache
           config_path: ${{ env.config_path }}
           env_variables: ${{ env.env_variables }}
 
       - name: Validate cache exists
         uses: actions/cache/restore@v4
         with:
-          key: ${{ env.state_cache_prefix }}
-          restore-keys: ${{ env.state_cache_prefix }}
+          key: ${{ steps.test_run.outputs.state_cache_key }}
           path: ${{ env.state_path }}
           lookup-only: true
           fail-on-cache-miss: true
@@ -95,6 +95,14 @@ jobs:
           state_cache_prefix: ${{ env.state_cache_prefix }}
           config_path: ${{ env.config_path }}
           env_variables: ${{ env.env_variables }}
+
+      - name: Validate cache exists
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ steps.test_run.outputs.state_cache_key }}
+          path: ${{ env.state_path }}
+          lookup-only: true
+          fail-on-cache-miss: true
 
       - name: Validate state folder deletion
         run: test -d ${{ env.state_path }} && exit 1 || exit 0
