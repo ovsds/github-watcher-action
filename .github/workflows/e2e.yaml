@@ -1,0 +1,103 @@
+name: E2E
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+env:
+  state_path: /tmp/e2e-${{ github.run_id }}-${{ github.run_attempt }}/state
+  env_path: /tmp/e2e-${{ github.run_id }}-${{ github.run_attempt }}/.env
+  state_cache_prefix: e2e-${{ github.run_id }}-${{ github.run_attempt }}
+  config_path: .github/test_github_watcher_config.yaml
+  env_variables: |
+    GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+    TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }}
+    TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_TEST_CHAT_ID }}
+
+jobs:
+  e2e-default:
+    runs-on: ubuntu-20.04
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Test Run
+        id: test_run
+        uses: ./
+        with:
+          config_path: ${{ env.config_path }}
+          env_variables: ${{ env.env_variables }}
+
+  e2e-no-cache:
+    runs-on: ubuntu-20.04
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Try restore cache
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ env.state_cache_prefix }}
+          restore-keys: ${{ env.state_cache_prefix }}
+          path: ${{ env.state_path }}
+          lookup-only: true
+
+      - name: Validate no cache exists
+        if: steps.try-restore-cache.outputs.cache-hit == 'true'
+        run: exit 1
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Test Run
+        id: test_run
+        uses: ./
+        with:
+          state_path: ${{ env.state_path }}
+          state_cache_prefix: ${{ env.state_cache_prefix }}
+          config_path: ${{ env.config_path }}
+          env_variables: ${{ env.env_variables }}
+
+      - name: Validate cache exists
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ env.state_cache_prefix }}
+          restore-keys: ${{ env.state_cache_prefix }}
+          path: ${{ env.state_path }}
+          lookup-only: true
+          fail-on-cache-miss: true
+
+  e2e-cache:
+    runs-on: ubuntu-20.04
+    needs:
+      - e2e-no-cache
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Test Run
+        id: test_run
+        uses: ./
+        with:
+          state_path: ${{ env.state_path }}
+          state_cache_prefix: ${{ env.state_cache_prefix }}
+          config_path: ${{ env.config_path }}
+          env_variables: ${{ env.env_variables }}
+
+      - name: Validate state folder deletion
+        run: test -d ${{ env.state_path }} && exit 1 || exit 0
+
+      - name: Validate env file deletion
+        run: test -f ${{ env.env_path }} && exit 1 || exit 0
