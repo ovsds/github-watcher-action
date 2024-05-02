@@ -12,6 +12,14 @@ inputs:
   env_variables:
     description: "Environment variables"
     required: false
+  state_path:
+    description: "Path to state directory, should be absolute and independent from the runner's workspace, otherwise cache will not work correctly"
+    required: false
+    default: "/tmp/github-watcher-action/state"
+  env_path:
+    description: "Path to env file"
+    required: false
+    default: ".env"
 
 runs:
   using: "composite"
@@ -21,23 +29,18 @@ runs:
       env:
         env_variables: ${{ inputs.env_variables }}
       run: |
-        echo "$env_variables" >> ${{ github.action_path }}/.env
-
-    - name: Cleanup env file
-      uses: gacts/run-and-post-run@v1
-      with:
-        post: |
-          rm ${{ github.action_path }}/.env
+        echo "$env_variables" >> ${{ inputs.env_path }}
 
     - name: Prepare state directory
       uses: actions/cache/restore@v4
       with:
-        path: ${{ github.action_path }}/state
+        path: ${{ inputs.state_path }}
         # cache is immutable, so we need to create a new key for each run
         # https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
-        key: github-watcher-state-${{ github.run_id }}
+        key: github-watcher-state-${{ github.run_id }}-${{ github.run_attempt }}
         restore-keys: |
           github-watcher-state-
+        enableCrossOsArchive: true
 
     - name: Run docker container
       shell: bash
@@ -48,17 +51,30 @@ runs:
           --rm \
           --volume ${{ github.action_path }}/settings.yaml:/settings.yaml \
           --volume ${{ github.workspace }}/${{ inputs.config_path }}:/config.yaml \
-          --volume ${{ github.action_path }}/state:/state \
-          --env-file ${{ github.action_path }}/.env \
+          --volume ${{ inputs.state_path }}:/state \
+          --env-file ${{ inputs.env_path }} \
           --env GITHUB_WATCHER_SETTINGS_YAML=/settings.yaml \
+          --env UMASK=000 \
           ghcr.io/ovsds/github-watcher:${{ inputs.version }}
 
     - name: Save state directory
       if: success() || failure()
       uses: actions/cache/save@v4
       with:
-        path: ${{ github.action_path }}/state
-        key: github-watcher-state-${{ github.run_id }}
+        path: ${{ inputs.state_path }}
+        key: github-watcher-state-${{ github.run_id }}-${{ github.run_attempt }}
+
+    - name: Cleanup state directory
+      if: success() || failure()
+      shell: bash
+      run: |
+        rm -rf ${{ inputs.state_path }}
+
+    - name: Cleanup env file
+      if: success() || failure()
+      shell: bash
+      run: |
+        rm ${{ inputs.env_path }}
 
 branding:
   icon: "message-circle"
