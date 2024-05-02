@@ -36,6 +36,7 @@ runs:
         echo "$env_variables" >> ${{ inputs.env_path }}
 
     - name: Prepare state directory
+      id: prepare-state-directory
       uses: actions/cache/restore@v4
       with:
         path: ${{ inputs.state_path }}
@@ -45,6 +46,12 @@ runs:
         restore-keys: |
           ${{ inputs.state_cache_prefix }}-
         enableCrossOsArchive: true
+
+    - name: Create state directory if cache miss
+      if: steps.prepare-state-directory.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        mkdir -p ${{ inputs.state_path }}
 
     - name: Run docker container
       shell: bash
@@ -58,8 +65,12 @@ runs:
           --volume ${{ inputs.state_path }}:/state \
           --env-file ${{ inputs.env_path }} \
           --env GITHUB_WATCHER_SETTINGS_YAML=/settings.yaml \
-          --env UMASK=000 \
           ghcr.io/ovsds/github-watcher:${{ inputs.version }}
+
+    - name: Print state directory
+      shell: bash
+      run: |
+        find ${{ inputs.state_path }} -ls
 
     - name: Save state directory
       if: success() || failure()
@@ -72,13 +83,13 @@ runs:
       if: success() || failure()
       shell: bash
       run: |
-        rm -rf ${{ inputs.state_path }}
+        sudo rm -rf ${{ inputs.state_path }}
 
     - name: Cleanup env file
       if: success() || failure()
       shell: bash
       run: |
-        rm ${{ inputs.env_path }}
+        sudo rm ${{ inputs.env_path }}
 
 branding:
   icon: "message-circle"
