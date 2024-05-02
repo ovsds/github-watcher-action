@@ -48,11 +48,6 @@ tasks:
       - task: _prettier
         vars: { COMMAND: "--write ." }
 
-  test:
-    desc: Test project
-    cmds:
-      - echo 'Running tests...'
-
   clean:
     desc: Clean project environment
     cmds:
