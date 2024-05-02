@@ -20,6 +20,10 @@ inputs:
     description: "Path to env file"
     required: false
     default: ".env"
+  state_cache_prefix:
+    description: "Cache prefix for state directory"
+    required: false
+    default: "github-watcher-state"
 
 runs:
   using: "composite"
@@ -37,9 +41,9 @@ runs:
         path: ${{ inputs.state_path }}
         # cache is immutable, so we need to create a new key for each run
         # https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
-        key: github-watcher-state-${{ github.run_id }}-${{ github.run_attempt }}
+        key: ${{ inputs.state_cache_prefix }}-${{ github.run_id }}-${{ github.run_attempt }}
         restore-keys: |
-          github-watcher-state-
+          ${{ inputs.state_cache_prefix }}-
         enableCrossOsArchive: true
 
     - name: Run docker container
@@ -62,7 +66,7 @@ runs:
       uses: actions/cache/save@v4
       with:
         path: ${{ inputs.state_path }}
-        key: github-watcher-state-${{ github.run_id }}-${{ github.run_attempt }}
+        key: ${{ inputs.state_cache_prefix }}-${{ github.run_id }}-${{ github.run_attempt }}
 
     - name: Cleanup state directory
       if: success() || failure()
