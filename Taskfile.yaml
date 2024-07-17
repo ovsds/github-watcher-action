@@ -31,9 +31,6 @@ tasks:
       - task: _with_nvm
         vars: { COMMAND: "npm run prepare-husky" }
 
-      - for: { var: SERVICES, as: SERVICE }
-        task: "{{.SERVICE}}:init"
-
   lint:
     desc: Lint project
     cmds:
@@ -64,6 +61,20 @@ tasks:
         vars: { COMMAND: "npm outdated" }
       - task: _with_nvm
         vars: { COMMAND: "npm audit" }
+
+  update-from-template:
+    desc: Update project from template
+    cmds:
+      - echo 'Updating project from template...'
+      - cookiecutter
+        --no-input
+        --overwrite-if-exists
+        --output-dir ../
+        {{.TEMPLATE_PATH}}
+        project_name="GitHub Watcher Action"
+        marketplace_name="GitHub Watcher Action"
+    vars:
+      TEMPLATE_PATH: '{{.TEMPLATE_PATH | default "https://github.com/ovsds/template-repository-github-action"}}'
 
   # CI-specific
 

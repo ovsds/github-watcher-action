@@ -1,5 +1,8 @@
 # GitHub Watcher Action
 
+[![CI](https://github.com/ovsds/github-watcher-action/workflows/Check%20PR/badge.svg)](https://github.com/ovsds/github-watcher-action/actions?query=workflow%3A%22%22Check+PR%22%22)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-GitHub%20Watcher%20Action-blue.svg)](https://github.com/marketplace/actions/github-watcher-action)
+
 GitHub Watcher Action is a GitHub action for setting up custom reactions on various triggers
 using [GitHub Watcher](https://github.com/ovsds/github-watcher).
 
@@ -75,7 +78,7 @@ tasks:
 More information on config can be found in
 [GitHub Watcher Config](https://github.com/ovsds/github-watcher/blob/main/backend/README.md#config)
 
-## Inputs
+### Action Inputs
 
 | Name                 | Description                                                                                                                      | Default                            |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
@@ -86,7 +89,7 @@ More information on config can be found in
 | `env_path`           | Path to env file, that will be used to pass env_variables to the container                                                       | `.env`                             |
 | `state_cache_prefix` | Cache prefix for state directory                                                                                                 | `github-watcher-state`             |
 
-## Outputs
+### Action Outputs
 
 | Name              | Description                   |
 | ----------------- | ----------------------------- |
@@ -104,6 +107,7 @@ Settings file can be found in [settings.yaml](settings.yaml). Basically, it cont
 
 ### Global dependencies
 
+- nvm
 - node
 
 ### Taskfile commands
