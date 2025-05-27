@@ -1,0 +1,31 @@
+name: Check PR Title
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  check-pr-title:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout config file
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            commitlint.config.js
+          sparse-checkout-cone-mode: false
+
+      - name: Commitlint PR Title
+        uses: ovsds/commitlint-pr-title-action@v1
+        with:
+          config_file: ./commitlint.config.js

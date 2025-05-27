@@ -37,8 +37,10 @@ runs:
       shell: bash
       env:
         env_variables: ${{ inputs.env_variables }}
+        env_path: ${{ inputs.env_path }}
       run: |
-        echo "$env_variables" >> ${{ inputs.env_path }}
+        mkdir -p $(dirname $env_path)
+        echo "$env_variables" >> $env_path
 
     - name: Prepare state directory
       id: prepare-state-directory
@@ -48,35 +50,42 @@ runs:
         # cache is immutable, so we need to create a new key for each run
         # https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
         key: ${{ inputs.state_cache_prefix }}-${{ github.run_id }}-${{ github.run_attempt }}
-        restore-keys: |
-          ${{ inputs.state_cache_prefix }}-
+        restore-keys: ${{ inputs.state_cache_prefix }}-
         enableCrossOsArchive: true
 
     - name: Create state directory if cache miss
       if: steps.prepare-state-directory.outputs.cache-hit != 'true'
       shell: bash
+      env:
+        state_path: ${{ inputs.state_path }}
       run: |
-        mkdir -p ${{ inputs.state_path }}
+        mkdir -p $state_path
 
     - name: Run docker container
       shell: bash
       env:
+        settings_path: ${{ github.action_path }}/settings.yaml
+        config_path: ${{ github.workspace }}/${{ inputs.config_path }}
+        state_path: ${{ inputs.state_path }}
+        env_path: ${{ inputs.env_path }}
         version: ${{ inputs.version }}
       run: |
         docker run \
           --rm \
-          --volume ${{ github.action_path }}/settings.yaml:/settings.yaml \
-          --volume ${{ github.workspace }}/${{ inputs.config_path }}:/config.yaml \
-          --volume ${{ inputs.state_path }}:/state \
-          --env-file ${{ inputs.env_path }} \
+          --volume $settings_path:/settings.yaml \
+          --volume $config_path:/config.yaml \
+          --volume $state_path:/state \
+          --env-file $env_path \
           --env GITHUB_WATCHER_SETTINGS_YAML=/settings.yaml \
           --user $UID:$GID \
-          ghcr.io/ovsds/github-watcher:${{ inputs.version }}
+          ghcr.io/ovsds/github-watcher:$version
 
     - name: Print state directory
       shell: bash
+      env:
+        state_path: ${{ inputs.state_path }}
       run: |
-        find ${{ inputs.state_path }} -ls
+        find $state_path -ls
 
     - name: Save state directory
       if: success() || failure()
@@ -88,14 +97,18 @@ runs:
     - name: Cleanup state directory
       if: success() || failure()
       shell: bash
+      env:
+        state_path: ${{ inputs.state_path }}
       run: |
-        rm -rf ${{ inputs.state_path }}
+        rm -rf $state_path
 
     - name: Cleanup env file
       if: success() || failure()
       shell: bash
+      env:
+        env_path: ${{ inputs.env_path }}
       run: |
-        rm ${{ inputs.env_path }}
+        rm $env_path
 
 branding:
   icon: "message-circle"

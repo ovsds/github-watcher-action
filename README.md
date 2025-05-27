@@ -107,8 +107,9 @@ Settings file can be found in [settings.yaml](settings.yaml). Basically, it cont
 
 ### Global dependencies
 
-- nvm
-- node
+- [Taskfile](https://taskfile.dev/installation/)
+- [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#install--update-script)
+- [zizmor](https://woodruffw.github.io/zizmor/installation/) - used for GHA security scanning
 
 ### Taskfile commands
 
