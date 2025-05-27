@@ -7,6 +7,10 @@ on:
       - reopened
       - synchronize
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number }}
+  cancel-in-progress: true
+
 env:
   state_path: /tmp/e2e-${{ github.run_id }}-${{ github.run_attempt }}/state
   env_path: /tmp/e2e-${{ github.run_id }}-${{ github.run_attempt }}/.env
@@ -20,7 +24,7 @@ env:
 
 jobs:
   e2e-default:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read
@@ -28,6 +32,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Test Run
         id: test_run
@@ -35,50 +41,60 @@ jobs:
         with:
           config_path: ${{ env.config_path }}
           env_variables: ${{ env.env_variables }}
+          env_path: ${{ env.env_path }}-default
+
+      - name: Validate state folder deletion
+        run: test -d $state_path && exit 1 || exit 0
+
+      - name: Validate env file deletion
+        run: test -f $env_path && exit 1 || exit 0
 
   e2e-no-cache:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
       - name: Try restore cache
+        id: try-restore-cache
         uses: actions/cache/restore@v4
         with:
-          key: ${{ env.state_cache_prefix }}
-          restore-keys: ${{ env.state_cache_prefix }}
-          path: ${{ env.state_path }}
+          key: ${{ env.state_cache_prefix }}-no-cache
+          path: ${{ env.state_path }}-no-cache
           lookup-only: true
 
-      - name: Validate no cache exists
-        if: steps.try-restore-cache.outputs.cache-hit == 'true'
-        run: exit 1
+      - name: Assert no cache exists
+        uses: nick-fields/assert-action@v2
+        with:
+          comparison: notEqual
+          actual: ${{ steps.try-restore-cache.outputs.cache-hit }}
+          expected: "true"
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Test Run
-        id: test_run
         uses: ./
         with:
-          state_path: ${{ env.state_path }}
-          state_cache_prefix: ${{ env.state_cache_prefix }}-no-cache
           config_path: ${{ env.config_path }}
+          env_path: ${{ env.env_path }}-no-cache
           env_variables: ${{ env.env_variables }}
+          state_cache_prefix: ${{ env.state_cache_prefix }}-no-cache
+          state_path: ${{ env.state_path }}-no-cache
 
       - name: Validate cache exists
         uses: actions/cache/restore@v4
         with:
-          key: ${{ steps.test_run.outputs.state_cache_key }}
-          path: ${{ env.state_path }}
+          key: ${{ env.state_cache_prefix }}-no-cache
+          path: ${{ env.state_path }}-no-cache
           lookup-only: true
           fail-on-cache-miss: true
 
   e2e-cache:
-    runs-on: ubuntu-20.04
-    needs:
-      - e2e-no-cache
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read
@@ -86,26 +102,56 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Test Run
-        id: test_run
         uses: ./
         with:
-          state_path: ${{ env.state_path }}
-          state_cache_prefix: ${{ env.state_cache_prefix }}
           config_path: ${{ env.config_path }}
+          env_path: ${{ env.env_path }}-cache
           env_variables: ${{ env.env_variables }}
+          state_cache_prefix: ${{ env.state_cache_prefix }}-cache
+          state_path: ${{ env.state_path }}-cache
+
+      - name: Validate cache exists
+        id: validate-cache
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ env.state_cache_prefix }}-cache
+          path: ${{ env.state_path }}-cache
+          lookup-only: true
+          fail-on-cache-miss: true
+
+      - name: Test Run
+        uses: ./
+        with:
+          config_path: ${{ env.config_path }}
+          env_path: ${{ env.env_path }}-cache
+          env_variables: ${{ env.env_variables }}
+          state_cache_prefix: ${{ env.state_cache_prefix }}-cache
+          state_path: ${{ env.state_path }}-cache
 
       - name: Validate cache exists
         uses: actions/cache/restore@v4
         with:
-          key: ${{ steps.test_run.outputs.state_cache_key }}
-          path: ${{ env.state_path }}
+          key: ${{ env.state_cache_prefix }}-cache
+          path: ${{ env.state_path }}-cache
           lookup-only: true
           fail-on-cache-miss: true
 
-      - name: Validate state folder deletion
-        run: test -d ${{ env.state_path }} && exit 1 || exit 0
+  e2e:
+    runs-on: ubuntu-latest
+    if: always() && !cancelled()
 
-      - name: Validate env file deletion
-        run: test -f ${{ env.env_path }} && exit 1 || exit 0
+    needs:
+      - e2e-default
+      - e2e-no-cache
+      - e2e-cache
+
+    steps:
+      - name: Collect Results
+        uses: ovsds/collect-needs-result-action@v1
+        with:
+          needs_json: ${{ toJson(needs) }}
+          skip_allowed: false

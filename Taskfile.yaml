@@ -14,36 +14,36 @@ tasks:
   _with_nvm:
     internal: true
     cmds:
-      - "source ${HOME}/.nvm/nvm.sh && nvm use && {{.COMMAND}}"
+      - "source ${HOME}/.nvm/nvm.sh && nvm install && {{.COMMAND}}"
 
   init:
     desc: Initialize project environment
     cmds:
-      - echo 'Installing node version...'
-      - task: _with_nvm
-        vars: { COMMAND: "nvm install" }
-
       - echo 'Installing node dependencies...'
       - task: _with_nvm
-        vars: { COMMAND: "npm clean-install" }
+        vars: { COMMAND: "npm install" }
 
       - echo 'Installing husky pre-commit...'
       - task: _with_nvm
-        vars: { COMMAND: "npm run prepare-husky" }
+        vars: { COMMAND: "npm run prepare" }
 
   lint:
     desc: Lint project
     cmds:
-      - echo 'Running prettier checks...'
-      - task: _prettier
-        vars: { COMMAND: "--check ." }
+      - task: _with_nvm
+        vars: { COMMAND: "npm run lint:check" }
+
+      - echo 'Running GHA checks...'
+      - GH_TOKEN="$(gh auth token)" zizmor .
 
   lint-fix:
     desc: Lint fix project
     cmds:
-      - echo 'Running prettier fixes...'
-      - task: _prettier
-        vars: { COMMAND: "--write ." }
+      - task: _with_nvm
+        vars: { COMMAND: "npm run lint:fix" }
+
+      - echo 'Running GHA checks...'
+      - GH_TOKEN="$(gh auth token)" zizmor .
 
   clean:
     desc: Clean project environment
@@ -57,6 +57,11 @@ tasks:
       - echo 'Updating node dependencies...'
       - task: _with_nvm
         vars: { COMMAND: "npm update" }
+
+  dependencies-check:
+    desc: Check dependencies
+    cmds:
+      - echo 'Checking node dependencies...'
       - task: _with_nvm
         vars: { COMMAND: "npm outdated" }
       - task: _with_nvm
@@ -71,15 +76,13 @@ tasks:
         --overwrite-if-exists
         --output-dir ../
         {{.TEMPLATE_PATH}}
-        project_name="GitHub Watcher Action"
-        marketplace_name="GitHub Watcher Action"
+        project_name='GitHub Watcher Action'
+        project_slug='github-watcher-action'
+        marketplace_name='GitHub Watcher Action'
+        action_type='composite'
+        node_version='v21.5.0'
+        owner_name='Dmitry Ovsiannikov'
+        owner_github_login='ovsds'
+        with_zizmor='true'
     vars:
       TEMPLATE_PATH: '{{.TEMPLATE_PATH | default "https://github.com/ovsds/template-repository-github-action"}}'
-
-  # CI-specific
-
-  ci-init:
-    desc: Initialize project environment in CI
-    cmds:
-      - echo 'Installing node dependencies...'
-      - npm clean-install
