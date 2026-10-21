@@ -21,11 +21,13 @@ jobs:
         with:
           persist-credentials: false
           sparse-checkout: |
+            action.yaml
+            settings.yaml
             example_config.yaml
           sparse-checkout-cone-mode: false
 
       - name: Run
-        uses: ovsds/github-watcher-action@main
+        uses: $/
         with:
           config_path: example_config.yaml
           env_variables: |
