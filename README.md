@@ -34,6 +34,7 @@ jobs:
       - name: Checkout config file
         uses: actions/checkout@v7
         with:
+          persist-credentials: false
           sparse-checkout: |
             .github/github-watcher-config.yaml
           sparse-checkout-cone-mode: false
