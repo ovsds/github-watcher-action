@@ -58,7 +58,7 @@ jobs:
     steps:
       - name: Try restore cache
         id: try-restore-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ env.state_cache_prefix }}-no-cache
           path: ${{ env.state_path }}-no-cache
@@ -86,7 +86,7 @@ jobs:
           state_path: ${{ env.state_path }}-no-cache
 
       - name: Validate cache exists
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ env.state_cache_prefix }}-no-cache
           path: ${{ env.state_path }}-no-cache
@@ -116,7 +116,7 @@ jobs:
 
       - name: Validate cache exists
         id: validate-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ env.state_cache_prefix }}-cache
           path: ${{ env.state_path }}-cache
@@ -133,7 +133,7 @@ jobs:
           state_path: ${{ env.state_path }}-cache
 
       - name: Validate cache exists
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ env.state_cache_prefix }}-cache
           path: ${{ env.state_path }}-cache
