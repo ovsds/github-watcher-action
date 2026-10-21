@@ -83,7 +83,7 @@ More information on config can be found in
 
 | Name                 | Description                                                                                                                      | Default                            |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `version`            | Github Watcher version                                                                                                           | `0.3.1`                            |
+| `version`            | Github Watcher version                                                                                                           | `0.5.0`                            |
 | `config_path`        | Path to the config file                                                                                                          |                                    |
 | `env_variables`      | Environment variables                                                                                                            |                                    |
 | `state_path`         | Path to state directory, should be absolute and independent from the runner's workspace, otherwise cache will not work correctly | `/tmp/github-watcher-action/state` |
