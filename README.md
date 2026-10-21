@@ -25,14 +25,14 @@ on:
 
 jobs:
   run-github-watcher:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
       - name: Checkout config file
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           sparse-checkout: |
             .github/github-watcher-config.yaml
