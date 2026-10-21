@@ -25,15 +25,16 @@ on:
 
 jobs:
   run-github-watcher:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
       - name: Checkout config file
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
+          persist-credentials: false
           sparse-checkout: |
             .github/github-watcher-config.yaml
           sparse-checkout-cone-mode: false
@@ -82,7 +83,7 @@ More information on config can be found in
 
 | Name                 | Description                                                                                                                      | Default                            |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `version`            | Github Watcher version                                                                                                           | `0.3.1`                            |
+| `version`            | Github Watcher version                                                                                                           | `0.5.0`                            |
 | `config_path`        | Path to the config file                                                                                                          |                                    |
 | `env_variables`      | Environment variables                                                                                                            |                                    |
 | `state_path`         | Path to state directory, should be absolute and independent from the runner's workspace, otherwise cache will not work correctly | `/tmp/github-watcher-action/state` |
@@ -107,13 +108,13 @@ Settings file can be found in [settings.yaml](settings.yaml). Basically, it cont
 
 ### Global dependencies
 
-- [Taskfile](https://taskfile.dev/installation/)
-- [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#install--update-script)
-- [zizmor](https://woodruffw.github.io/zizmor/installation/) - used for GHA security scanning
+- [mise](https://mise.jdx.dev/installing-mise.html), activated in the shell (`eval "$(mise activate zsh)"`)
 
-### Taskfile commands
+All other tools are pinned in [mise.toml](mise.toml).
 
-For all commands see [Taskfile](Taskfile.yaml) or `task --list-all`.
+### mise tasks
+
+For all commands see [mise.toml](mise.toml) or `mise tasks ls`.
 
 ## License
 

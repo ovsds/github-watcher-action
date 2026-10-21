@@ -44,7 +44,7 @@ runs:
 
     - name: Prepare state directory
       id: prepare-state-directory
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ inputs.state_path }}
         # cache is immutable, so we need to create a new key for each run
@@ -89,7 +89,7 @@ runs:
 
     - name: Save state directory
       if: success() || failure()
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ inputs.state_path }}
         key: ${{ inputs.state_cache_prefix }}-${{ github.run_id }}-${{ github.run_attempt }}
